@@ -153,11 +153,13 @@ V, policy, iterations = value_iteration(env)
 # -------------------------------------------------
 # Display Output
 # -------------------------------------------------
-
+print("Name: P Keerthana")
+print("Register Number: 212223240069")
+print("Value Iteration Completed")
 print("Number of Iterations:", iterations)
 
 print("\nOptimal State-Value Function:")
-print(np.round(V.reshape(4,4),4))
+print(np.round(V.reshape(4, 4), 4))
 
 action_symbols = {
     0: "L",
@@ -167,8 +169,8 @@ action_symbols = {
 }
 
 policy_grid = np.array(
-    [action_symbols[a] for a in policy]
-).reshape(4,4)
+    [action_symbols[action] for action in policy]
+).reshape(4, 4)
 
 print("\nOptimal Policy:")
 print(policy_grid)
