@@ -81,108 +81,83 @@ The process continues until the maximum change in the value function becomes sma
 
 import gymnasium as gym
 import numpy as np
-import matplotlib.pyplot as plt
 
 # -------------------------------------------------
 # Create FrozenLake Environment
 # -------------------------------------------------
 
 env_desc = [
-    "FHFF",
+    "FFFF",
     "FHFH",
     "SFFH",
     "HFFG"
 ]
 
 env = gym.make("FrozenLake-v1", desc=env_desc, is_slippery=True)
-# write your code here
+
+P = env.unwrapped.P
+n_states = env.observation_space.n
+n_actions = env.action_space.n
+
 
 # -------------------------------------------------
 # Value Iteration Algorithm
 # -------------------------------------------------
 
 def value_iteration(env, gamma=0.99, theta=1e-8):
-    """
-    Performs value iteration and returns the optimal value function.
-    """
-    # write your code here
+
+    P = env.unwrapped.P
     n_states = env.observation_space.n
     n_actions = env.action_space.n
 
-    # Initialize value function
     V = np.zeros(n_states)
-
+    policy = np.zeros(n_states, dtype=int)
     iteration = 0
 
     while True:
         delta = 0
-        V_new = np.copy(V)
-        for state in range(n_states):
 
-            action_values = []
+        for s in range(n_states):
 
-            for action in range(n_actions):
+            action_values = np.zeros(n_actions)
 
-                value = 0
-                for probability, next_state, reward, terminated in env.unwrapped.P[state][action]:
-
-                    value += probability * (
-                        reward + gamma * V[next_state] * (not terminated)
+            for a in range(n_actions):
+                for prob, next_state, reward, done in P[s][a]:
+                    action_values[a] += prob * (
+                        reward + gamma * V[next_state]
                     )
 
-                action_values.append(value)
-            V_new[state] = max(action_values)
-            delta = max(delta, abs(V_new[state] - V[state]))
+            best_action = np.argmax(action_values)
+            best_value = action_values[best_action]
 
-        V = V_new
+            delta = max(delta, abs(best_value - V[s]))
+
+            V[s] = best_value
+            policy[s] = best_action
+
         iteration += 1
+
         if delta < theta:
             break
-    policy = np.zeros(n_states, dtype=int)
-
-    for state in range(n_states):
-
-        action_values = []
-
-        for action in range(n_actions):
-
-            value = 0
-
-            for probability, next_state, reward, terminated in env.unwrapped.P[state][action]:
-
-                value += probability * (
-                    reward + gamma * V[next_state] * (not terminated)
-                )
-
-            action_values.append(value)
-
-        policy[state] = np.argmax(action_values)
-
 
     return V, policy, iteration
+
+
 # -------------------------------------------------
 # Run Value Iteration
 # -------------------------------------------------
 
-# write your code here
-V, policy, iterations = value_iteration(
-    env,
-    gamma=0.99,
-    theta=1e-8
-)
+V, policy, iterations = value_iteration(env)
 
 
 # -------------------------------------------------
 # Display Output
 # -------------------------------------------------
-print("Name: P Keerthana ")
-print("Register Number: 212223240069")
-print("Value Iteration Completed")
+
 print("Number of Iterations:", iterations)
 
 print("\nOptimal State-Value Function:")
-print(np.round(V.reshape(4, 4), 4))
-
+print(np.round(V.reshape(4,4),4))
 
 action_symbols = {
     0: "L",
@@ -192,13 +167,11 @@ action_symbols = {
 }
 
 policy_grid = np.array(
-    [action_symbols[action] for action in policy]
-).reshape(4, 4)
+    [action_symbols[a] for a in policy]
+).reshape(4,4)
 
 print("\nOptimal Policy:")
 print(policy_grid)
-
-env.close()
 
 ```
 
